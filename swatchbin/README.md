@@ -1,7 +1,7 @@
 # swatchbin-tool
 This tool converts the Forza .swatchbin format to whatever image format you want.
 
->Usage: python swatchbin.py \<input file> \<output file>
+>Usage: python swatchbin.py \<input file> \<output file>  
 >Example: python swatchbin.swatchbin texture.py out.png
 
 **First install the required modules:**
