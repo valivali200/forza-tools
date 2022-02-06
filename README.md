@@ -5,3 +5,5 @@ Right now, there is only a converter for .swatchbin textures, but in the future 
 There are other closed-source tools out there but I felt like making my own.
 
 I know python is slow and probably isn't the best for this, but it works and in this case, it is reasonably fast.
+
+Each tool has a README of its own and an info.txt file which contains information about the format.
