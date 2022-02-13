@@ -46,7 +46,18 @@ VLay:
     
     uint16 data entries
     ... ?
+
+entry headers:
+    4 char8 'enaM'
+    10 bytes ?
+    uint16 name_len
+    str[name_len-8]
+    4 bytes padding
     
     
 1 IndB per model
 first VerB is position data for all vertices and it is stored in sint16 as x,y,z,?
+
+Mesh:
+    43 bytes?
+    uint32 size of group
