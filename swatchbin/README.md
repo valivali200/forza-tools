@@ -1,8 +1,7 @@
 # swatchbin-tool
 This tool converts the Forza .swatchbin format to whatever image format you want.
 
->**First install the required modules:**
->`pip install texture2ddecoder pillow`  
+>**First install the required modules:** `pip install texture2ddecoder pillow`  
 
 >Usage: `python swatchbin.py <input file> <output file>`  
 >Example: `python swatchbin.swatchbin texture.py out.png`
