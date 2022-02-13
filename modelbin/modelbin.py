@@ -6,9 +6,9 @@ def getUint32(offset):
 def getUint16(offset):
     return int.from_bytes(model[offset:offset+2], 'little')
 def getSint32(offset):
-    return int.from_bytes(model[offset:offset+4], 'little', True)
+    return int.from_bytes(model[offset:offset+4], 'little', signed=True)
 def getSint16(offset):
-    return int.from_bytes(model[offset:offset+2], 'little', True)
+    return int.from_bytes(model[offset:offset+2], 'little', signed=True)
 
 def getFaceIndices(offset): # parse index buffer
     count = getUint32(offset)
@@ -28,9 +28,9 @@ def getVertexPositions(offset): # parse first vertex buffer with positions for a
     vertexPositions = []
     for i in range(0, verts):
         offset += 0
-        x = getUint16(offset)/65535
-        y = getUint16(offset+2)/65535
-        z = getUint16(offset+4)/65535
+        x = getSint16(offset)/32767
+        y = getSint16(offset+2)/32767
+        z = getSint16(offset+4)/32767
         offset += 8
         vertexPositions.append([x,y,z])
     return vertexPositions

@@ -1,6 +1,15 @@
 # modelbin-tool
-This tool converts the .modelbin format to Wavefront obj.
+This tool converts the .modelbin format to Wavefront obj.  
+>Usage: `python modelbin.py <input file>`
+>Example: `python modelbin.py hood.modelbin`
+>*Outputs to **out.obj***
 
-**Work in progress!!!**
-Right now it barely produces some kind of mesh, but it's basically unusable.
-![screenshot](./unusable-mesh.png)
+
+### **TODO**:
+- Vertex positions ✓
+- Face indices ✓
+- Correct scaling
+- Grouping
+- UVs
+- Materials
+- etc.
