@@ -1,0 +1,32 @@
+HEADER:
+    PGZP
+    0x65 # 101, version probably, as in modelbin it was 0x0101
+    uint32 data_offset # 0x20
+    uint32 file_count
+    uint32 folder_count # idk what these are, they are unused either way
+    uint32 block_size # 512
+    uint32 block_count
+    0x00000000
+
+uint32[folder_count] # values starting from an arbitrary number increasing by 1-5 at a time up to file_count
+
+uint32 compressed_data_start
+
+padding 8
+
+block[block_count]
+
+compressed data (raw deflate, window -15)
+
+EOF
+
+BLOCK:
+    {uncompressed_size, flags, data_end}[block_size]
+    uint32 number of times data_end has overflowed (add 4294967296)
+    padding 4
+    # uncompressed_size - uint32
+    # data_end - uint32, the end of the data relative to each block (when last in the block it is relative to the start of the file)
+    # flags:
+    #     byte 1:   always 0x08
+    #     byte 2:   0x00/0x10/0x20/0x30
+    #     byte 3&4: uint16 unknown index
