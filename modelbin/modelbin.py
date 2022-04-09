@@ -1,6 +1,10 @@
 import os
 import sys
 import struct
+import uuid
+
+# -- OPTIONS --
+give_uuids_to_groups = False
 
 def getUint32(offset):
     return int.from_bytes(model[offset:offset+4], 'little')
@@ -13,14 +17,26 @@ def getSint16(offset):
 
 def getFaceIndices(offset): # parse index buffer
     count = getUint32(offset)
+    data_format = model[offset+12:offset+16]
     offset += 16
     faceIndices = []
-    for i in range(int(count/3)):
-        idx1 = getUint32(offset) + 1
-        idx2 = getUint32(offset+4) + 1
-        idx3 = getUint32(offset+8) + 1
-        offset += 12
-        faceIndices.append([idx1, idx2, idx3])
+    if data_format == b'\x2A\x00\x00\x00':
+        for i in range(int(count/3)):
+            idx1 = getUint32(offset) + 1
+            idx2 = getUint32(offset+4) + 1
+            idx3 = getUint32(offset+8) + 1
+            offset += 12
+            faceIndices.append([idx1, idx2, idx3])
+    elif data_format == b'\x39\x00\x00\x00':
+        for i in range(int(count/3)):
+            idx1 = getUint16(offset) + 1
+            idx2 = getUint16(offset+2) + 1
+            idx3 = getUint16(offset+4) + 1
+            offset += 6
+            faceIndices.append([idx1, idx2, idx3])
+    else:
+        print('Unknown FI data format.')
+        exit(1)
     return faceIndices
 
 def getVertexPositions(offset): # parse first vertex buffer with positions for all vertices
@@ -39,7 +55,7 @@ def getVertexPositions(offset): # parse first vertex buffer with positions for a
 # open files
 args = sys.argv[1:]
 model = open(args[0], 'rb+').read()
-obj = open('out.obj', 'w')
+obj = open(args[0].replace('.modelbin', '.obj'), 'w')
 
 # parse Grub header
 dataStart = getUint32(8)
@@ -94,17 +110,40 @@ for i in entry_headers_data:
     if i == []:
         entry_headers.append([])
         continue
-    bbox = []
-    name_length = int.from_bytes(i[14:16], 'little') - 8
-    name = i[16:16+name_length]
-    if i[8:12] == b'xoBB':
-        bbox = struct.unpack('6f', i[-24:])
-    entry_headers.append([name, bbox])    
+    dimensions = []
+    name = ''
+    if i[0:4] == b'emaN':
+        name_length = int.from_bytes(i[14:16], 'little') - 8
+        name = i[16:16+name_length]
+        if i[8:12] == b'xoBB':
+            bbox = struct.unpack('6f', i[-24:])
+            dim_x = abs(bbox[0] - bbox[3])
+            dim_y = abs(bbox[1] - bbox[4])
+            dim_z = abs(bbox[2] - bbox[5])
+            dimensions = [dim_x, dim_y, dim_z]
+    elif i[0:4] == b'xoBB':
+        bbox = struct.unpack('6f', i[8:32])
+        dim_x = abs(bbox[0] - bbox[3])
+        dim_y = abs(bbox[1] - bbox[4])
+        dim_z = abs(bbox[2] - bbox[5])
+        dimensions = [dim_x, dim_y, dim_z]
+    entry_headers.append([name, dimensions])    
+
+# scaling
+model_dim = entry_headers[-1][1]
+scale_x = model_dim[0]/2
+scale_y = model_dim[1]/2
+scale_z = model_dim[2]/2
+
+#scale_x, scale_y, scale_z = 1, 1, 1
 
 # get groups
 groups = []
 for i in MeshIdx:
-    name = entry_headers[i][0]
+    if give_uuids_to_groups:
+        name = str(entry_headers[i][0])[0:-1] + '_' + str(uuid.uuid4())[1:9]
+    else:
+        name = entry_headers[i][0]
     if name == b'Shadow':
         continue
     group_size = getUint32(entries[i][2]+43)
@@ -114,7 +153,7 @@ for i in MeshIdx:
 vpos_offset = entries[VerBIdx[0]][2]
 vpos_data = getVertexPositions(vpos_offset)
 for i in vpos_data: # write to obj
-    obj.write('v ' + str(i[0]) + ' ' + str(i[1]) + ' ' + str(i[2]) + '\n')
+    obj.write('v ' + str(i[0]*scale_x) + ' ' + str(i[1]*scale_y) + ' ' + str(i[2]*scale_z) + '\n')
 print('Vertices:', len(vpos_data))
 
 # parse face indices

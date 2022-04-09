@@ -26,14 +26,16 @@ entry types:
     ... there are more
     
 VerB/MBuf/IndB:
-    uint32 blocks
+    uint32 entries
     uint32 datasize
-    uint16 block size
-    uint16 values per block / vertex layout index
+    uint16 entry size
+    uint16 values per entry / vertex layout index
     uint32 types to follow
+    	0A000000 -?
     	0D000000 -?
     	25000000 -?
-    	2A000000 -face indices
+    	2A000000 -face indices uint32
+    	39000000 -face indices uint16
     data ...
     
 VLay:
@@ -49,7 +51,10 @@ VLay:
 
 entry headers:
     4 char8 'enaM'
-    10 bytes ?
+    uint16 unk1
+    uint16 unk2
+    4 char8 type xoBB/  dI
+    2 bytes ?
     uint16 name_len
     str[name_len-8]
     4 bytes padding
@@ -61,3 +66,10 @@ first VerB is position data for all vertices and it is stored in sint16 as x,y,z
 Mesh:
     43 bytes?
     uint32 size of group
+
+Modl: always 16 bytes and at the end of the file
+    uint16 Mesh entries
+    uint16 Buffer entries (IndB, VerB, MBuf)
+    uint16 VLay entries
+    uint16 Matl entries
+    8 bytes ?
